@@ -23,10 +23,12 @@ namespace osu.Server.PerformanceCalculator
         private readonly Ruleset ruleset;
         private readonly int rulesetId;
         private readonly bool dryRun;
+        private readonly UpdateQueue updateQueue;
 
-        public ServerPerformanceCalculator(int ruleset, bool dryRun)
+        public ServerPerformanceCalculator(int ruleset, bool dryRun, UpdateQueue updateQueue)
         {
             this.dryRun = dryRun;
+            this.updateQueue = updateQueue;
             this.ruleset = available_rulesets.Single(r => r.RulesetInfo.ID == ruleset);
             rulesetId = ruleset;
         }
@@ -56,6 +58,8 @@ namespace osu.Server.PerformanceCalculator
 
             var rating = ruleset.CreatePerformanceCalculator(difficultyAttribs, score.ToScore(ruleset))
                                 .Calculate(new Dictionary<string, double>());
+
+            updateQueue.Add(score, rating);
         }
 
         private static List<Ruleset> getRulesets()

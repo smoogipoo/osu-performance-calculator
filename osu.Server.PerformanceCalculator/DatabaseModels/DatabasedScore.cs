@@ -21,7 +21,7 @@ namespace osu.Server.PerformanceCalculator.DatabaseModels
         public ushort countkatu;
         public bool perfect;
         public ushort enabled_mods;
-        public float pp;
+        public float? pp;
         public bool hidden;
     }
 }
