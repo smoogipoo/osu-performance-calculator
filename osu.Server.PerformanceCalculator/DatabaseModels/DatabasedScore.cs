@@ -7,20 +7,20 @@ namespace osu.Server.PerformanceCalculator.DatabaseModels
 {
     public class DatabasedScore
     {
-        public long score_id;
-        public int beatmap_id;
-        public int user_id;
+        public ulong score_id;
+        public uint beatmap_id;
+        public uint user_id;
         public int score;
-        public short maxcombo;
+        public ushort maxcombo;
         public string? rank;
-        public short count50;
-        public short count100;
-        public short count300;
-        public short countmiss;
-        public short countgeki;
-        public short countkatu;
+        public ushort count50;
+        public ushort count100;
+        public ushort count300;
+        public ushort countmiss;
+        public ushort countgeki;
+        public ushort countkatu;
         public bool perfect;
-        public short enabled_mods;
+        public ushort enabled_mods;
         public float pp;
         public bool hidden;
     }

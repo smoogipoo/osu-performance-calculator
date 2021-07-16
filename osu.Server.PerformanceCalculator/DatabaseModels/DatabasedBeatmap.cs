@@ -7,11 +7,11 @@ namespace osu.Server.PerformanceCalculator.DatabaseModels
 {
     public class DatabasedBeatmap
     {
-        public int beatmap_id;
-        public short countTotal;
-        public short countNormal;
-        public short countSlider;
-        public short countSpinner;
+        public uint beatmap_id;
+        public ushort countTotal;
+        public ushort countNormal;
+        public ushort countSlider;
+        public ushort countSpinner;
         public float difficultyrating;
     }
 }

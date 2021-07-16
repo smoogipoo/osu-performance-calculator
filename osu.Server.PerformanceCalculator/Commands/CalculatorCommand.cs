@@ -1,7 +1,10 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using McMaster.Extensions.CommandLineUtils;
 using osu.Server.PerformanceCalculator.DatabaseModels;
 
@@ -32,6 +35,8 @@ namespace osu.Server.PerformanceCalculator.Commands
         public bool DryRun { get; set; }
 
         private IReporter reporter = null!;
+        private long processedScores;
+        private long totalScores;
 
         public void OnExecute(CommandLineApplication app, IConsole console)
         {
@@ -47,10 +52,57 @@ namespace osu.Server.PerformanceCalculator.Commands
                 return;
             }
 
-            foreach (var score in GetScores())
+            var scoreQueue = new ConcurrentQueue<DatabasedScore>();
+
+            var tasks = new Task[Concurrency];
+            bool allAdded = false;
+
+            for (int i = 0; i < Concurrency; i++)
             {
-                new ServerPerformanceCalculator(Ruleset, DryRun).ProcessScore(score);
+                tasks[i] = Task.Factory.StartNew(() =>
+                {
+                    var calc = new ServerPerformanceCalculator(Ruleset, DryRun);
+
+                    while (!allAdded || !scoreQueue.IsEmpty)
+                    {
+                        if (!scoreQueue.TryDequeue(out var score))
+                            continue;
+
+                        try
+                        {
+                            calc.ProcessScore(score);
+                        }
+                        catch
+                        {
+                        }
+
+                        Interlocked.Increment(ref processedScores);
+                    }
+                }, TaskCreationOptions.LongRunning);
             }
+
+            Task.Factory.StartNew(() =>
+            {
+                foreach (var score in GetScores())
+                {
+                    scoreQueue.Enqueue(score);
+                    totalScores++;
+                }
+
+                allAdded = true;
+            });
+
+            using (new Timer(_ => outputProgress(), null, 1000, 1000))
+                Task.WaitAll(tasks);
+        }
+
+        private long lastProgress;
+
+        private void outputProgress()
+        {
+            long processed = processedScores;
+            reporter.Output($"Processed {processed} / {totalScores} ({processed - lastProgress}/sec)");
+            lastProgress = processed;
         }
 
         protected abstract IEnumerable<DatabasedScore> GetScores();

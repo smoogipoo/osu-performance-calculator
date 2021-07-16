@@ -13,6 +13,7 @@ namespace osu.Server.PerformanceCalculator
     [Subcommand(typeof(ScoresCommand))]
     [Subcommand(typeof(SqlCommand))]
     [Subcommand(typeof(UsersCommand))]
+    [Subcommand(typeof(AllScoresCommand))]
     public class Program
     {
         public static void Main(string[] args)

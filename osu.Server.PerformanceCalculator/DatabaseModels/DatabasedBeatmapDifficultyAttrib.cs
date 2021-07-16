@@ -7,10 +7,10 @@ namespace osu.Server.PerformanceCalculator.DatabaseModels
 {
     public class DatabasedBeatmapDifficultyAttrib
     {
-        public int beatmap_id;
-        public short mode;
-        public int mods;
-        public short attrib_id;
+        public uint beatmap_id;
+        public ushort mode;
+        public uint mods;
+        public ushort attrib_id;
         public float value;
     }
 }
