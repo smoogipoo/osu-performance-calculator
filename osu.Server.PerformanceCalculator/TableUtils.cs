@@ -9,6 +9,8 @@ namespace osu.Server.PerformanceCalculator
     {
         public static string LastUserIdKey(int ruleset) => $"pp_last_user_id{RulesetSuffix(ruleset)}";
 
+        public static string ScoresTable(int ruleset) => $"osu_scores{RulesetSuffix(ruleset)}_high";
+
         public static string RulesetSuffix(int ruleset)
         {
             switch (ruleset)

@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using McMaster.Extensions.CommandLineUtils;
+using osu.Server.PerformanceCalculator.DatabaseModels;
 
 namespace osu.Server.PerformanceCalculator.Commands
 {
@@ -12,7 +13,7 @@ namespace osu.Server.PerformanceCalculator.Commands
         [Argument(0, "statement", "The SQL statement selecting the user IDs to compute performance for.")]
         public string Statement { get; set; } = null!;
 
-        protected override IEnumerable<long> GetScores()
+        protected override IEnumerable<DatabasedScore> GetScores()
         {
             throw new System.NotImplementedException();
         }

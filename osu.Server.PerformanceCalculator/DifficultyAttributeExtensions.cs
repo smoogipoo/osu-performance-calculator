@@ -1,17 +1,63 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Collections.Generic;
 using osu.Game.Rulesets.Catch.Difficulty;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Mania.Difficulty;
 using osu.Game.Rulesets.Osu.Difficulty;
 using osu.Game.Rulesets.Taiko.Difficulty;
+using osu.Server.PerformanceCalculator.DatabaseModels;
 
 namespace osu.Server.PerformanceCalculator
 {
     public static class DifficultyAttributeExtensions
     {
+        public static DifficultyAttributes Map(this Dictionary<int, DatabasedBeatmapDifficultyAttrib> databasedAttribs, int rulesetId)
+        {
+            switch (rulesetId)
+            {
+                case 0:
+                    return new OsuDifficultyAttributes
+                    {
+                        AimStrain = databasedAttribs[1].value,
+                        SpeedStrain = databasedAttribs[3].value,
+                        OverallDifficulty = databasedAttribs[5].value,
+                        ApproachRate = databasedAttribs[7].value,
+                        MaxCombo = Convert.ToInt32(databasedAttribs[9].value),
+                        StarRating = databasedAttribs[11].value
+                    };
+
+                case 1:
+                    return new TaikoDifficultyAttributes
+                    {
+                        MaxCombo = Convert.ToInt32(databasedAttribs[9].value),
+                        StarRating = databasedAttribs[11].value,
+                        GreatHitWindow = databasedAttribs[13].value
+                    };
+
+                case 2:
+                    return new CatchDifficultyAttributes
+                    {
+                        StarRating = databasedAttribs[1].value,
+                        ApproachRate = databasedAttribs[7].value,
+                        MaxCombo = Convert.ToInt32(databasedAttribs[9].value)
+                    };
+
+                case 3:
+                    return new ManiaDifficultyAttributes
+                    {
+                        StarRating = databasedAttribs[11].value,
+                        GreatHitWindow = databasedAttribs[13].value,
+                        ScoreMultiplier = databasedAttribs[15].value
+                    };
+
+                default:
+                    throw new ArgumentException($"Invalid ruleset ({rulesetId}).", nameof(rulesetId));
+            }
+        }
+
         public static IEnumerable<(int id, object value)> Map(this DifficultyAttributes attributes)
         {
             switch (attributes)

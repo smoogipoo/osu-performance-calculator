@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using McMaster.Extensions.CommandLineUtils;
+using osu.Server.PerformanceCalculator.DatabaseModels;
 
 namespace osu.Server.PerformanceCalculator.Commands
 {
@@ -52,6 +53,6 @@ namespace osu.Server.PerformanceCalculator.Commands
             }
         }
 
-        protected abstract IEnumerable<long> GetScores();
+        protected abstract IEnumerable<DatabasedScore> GetScores();
     }
 }
