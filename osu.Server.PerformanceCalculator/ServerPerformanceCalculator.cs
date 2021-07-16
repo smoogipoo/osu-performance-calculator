@@ -42,7 +42,7 @@ namespace osu.Server.PerformanceCalculator
             {
                 using (var conn = Database.GetConnection())
                 {
-                    cached_beatmaps[score.beatmap_id] = databasedBeatmap = conn.QuerySingle<DatabasedBeatmap>(
+                    cached_beatmaps[score.beatmap_id] = databasedBeatmap = conn.QuerySingleOrDefault<DatabasedBeatmap>(
                         "SELECT * FROM `osu_beatmaps` WHERE `beatmap_id` = @BeatmapId",
                         new
                         {
@@ -65,7 +65,7 @@ namespace osu.Server.PerformanceCalculator
             }
 
             // Todo: Log.
-            if (databasedAttribs.Length == 0)
+            if (databasedBeatmap == null || databasedAttribs.Length == 0)
                 return;
 
             DifficultyAttributes difficultyAttribs = databasedAttribs.Where(a => a.mode == rulesetId && a.mods == (int)((LegacyMods)score.enabled_mods).MaskRelevantMods())
