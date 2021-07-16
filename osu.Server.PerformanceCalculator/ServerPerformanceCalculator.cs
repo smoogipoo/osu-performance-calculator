@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace osu.Server.PerformanceCalculator
     public class ServerPerformanceCalculator
     {
         private static readonly List<Ruleset> available_rulesets = getRulesets();
-        private static readonly Dictionary<uint, DatabasedBeatmapDifficultyAttrib[]> cached_beatmap_attribs = new Dictionary<uint, DatabasedBeatmapDifficultyAttrib[]>();
+        private static readonly ConcurrentDictionary<uint, DatabasedBeatmapDifficultyAttrib[]> cached_beatmap_attribs = new ConcurrentDictionary<uint, DatabasedBeatmapDifficultyAttrib[]>();
 
         private readonly Ruleset ruleset;
         private readonly int rulesetId;
@@ -32,32 +33,29 @@ namespace osu.Server.PerformanceCalculator
 
         public void ProcessScore(DatabasedScore score)
         {
-            try
+            if (!cached_beatmap_attribs.TryGetValue(score.beatmap_id, out var databasedAttribs))
             {
-                if (!cached_beatmap_attribs.TryGetValue(score.beatmap_id, out var databasedAttribs))
+                using (var conn = Database.GetConnection())
                 {
-                    using (var conn = Database.GetConnection())
-                    {
-                        cached_beatmap_attribs[score.beatmap_id] = databasedAttribs = conn.Query<DatabasedBeatmapDifficultyAttrib>(
-                            "SELECT * FROM `osu_beatmap_difficulty_attribs` WHERE `beatmap_id` = @BeatmapId",
-                            new
-                            {
-                                BeatmapId = score.beatmap_id,
-                            }).ToArray();
-                    }
+                    cached_beatmap_attribs[score.beatmap_id] = databasedAttribs = conn.Query<DatabasedBeatmapDifficultyAttrib>(
+                        "SELECT * FROM `osu_beatmap_difficulty_attribs` WHERE `beatmap_id` = @BeatmapId",
+                        new
+                        {
+                            BeatmapId = score.beatmap_id,
+                        }).ToArray();
                 }
-
-                DifficultyAttributes difficultyAttribs = databasedAttribs.Where(a => a.mode == rulesetId && a.mods == (int)((LegacyMods)score.enabled_mods).MaskRelevantMods())
-                                                                         .ToDictionary(a => (int)a.attrib_id).Map(rulesetId);
-                difficultyAttribs.Mods = ruleset.ConvertFromLegacyMods((LegacyMods)score.enabled_mods).ToArray();
-
-                var rating = ruleset.CreatePerformanceCalculator(difficultyAttribs, score.ToScore(ruleset))
-                                    .Calculate(new Dictionary<string, double>());
             }
-            catch
-            {
-                Console.WriteLine($"Failed to process score {score.score_id}.");
-            }
+
+            // Todo: Log.
+            if (databasedAttribs.Length == 0)
+                return;
+
+            DifficultyAttributes difficultyAttribs = databasedAttribs.Where(a => a.mode == rulesetId && a.mods == (int)((LegacyMods)score.enabled_mods).MaskRelevantMods())
+                                                                     .ToDictionary(a => (int)a.attrib_id).Map(rulesetId);
+            difficultyAttribs.Mods = ruleset.ConvertFromLegacyMods((LegacyMods)score.enabled_mods).ToArray();
+
+            var rating = ruleset.CreatePerformanceCalculator(difficultyAttribs, score.ToScore(ruleset))
+                                .Calculate(new Dictionary<string, double>());
         }
 
         private static List<Ruleset> getRulesets()

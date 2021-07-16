@@ -26,7 +26,8 @@ namespace osu.Server.PerformanceCalculator
                         OverallDifficulty = databasedAttribs[5].value,
                         ApproachRate = databasedAttribs[7].value,
                         MaxCombo = Convert.ToInt32(databasedAttribs[9].value),
-                        StarRating = databasedAttribs[11].value
+                        // Seems to not always be included, weirdly. Likely needs recalc... (beatmap_id=279607)
+                        // StarRating = databasedAttribs[11].value
                     };
 
                 case 1:
