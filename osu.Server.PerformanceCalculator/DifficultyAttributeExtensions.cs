@@ -14,7 +14,7 @@ namespace osu.Server.PerformanceCalculator
 {
     public static class DifficultyAttributeExtensions
     {
-        public static DifficultyAttributes Map(this Dictionary<int, DatabasedBeatmapDifficultyAttrib> databasedAttribs, int rulesetId)
+        public static DifficultyAttributes Map(this Dictionary<int, DatabasedBeatmapDifficultyAttrib> databasedAttribs, int rulesetId, DatabasedBeatmap databasedBeatmap)
         {
             switch (rulesetId)
             {
@@ -27,7 +27,9 @@ namespace osu.Server.PerformanceCalculator
                         ApproachRate = databasedAttribs[7].value,
                         MaxCombo = Convert.ToInt32(databasedAttribs[9].value),
                         // Seems to not always be included, weirdly. Likely needs recalc... (beatmap_id=279607)
-                        // StarRating = databasedAttribs[11].value
+                        // StarRating = databasedAttribs[11].value,
+                        HitCircleCount = databasedBeatmap.countNormal,
+                        SpinnerCount = databasedBeatmap.countSpinner,
                     };
 
                 case 1:

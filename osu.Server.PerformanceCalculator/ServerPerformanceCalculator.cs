@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,6 +19,8 @@ namespace osu.Server.PerformanceCalculator
     public class ServerPerformanceCalculator
     {
         private static readonly List<Ruleset> available_rulesets = getRulesets();
+
+        private static readonly ConcurrentDictionary<uint, DatabasedBeatmap> cached_beatmaps = new ConcurrentDictionary<uint, DatabasedBeatmap>();
         private static readonly ConcurrentDictionary<uint, DatabasedBeatmapDifficultyAttrib[]> cached_beatmap_attribs = new ConcurrentDictionary<uint, DatabasedBeatmapDifficultyAttrib[]>();
 
         private readonly Ruleset ruleset;
@@ -35,6 +38,19 @@ namespace osu.Server.PerformanceCalculator
 
         public void ProcessScore(DatabasedScore score)
         {
+            if (!cached_beatmaps.TryGetValue(score.beatmap_id, out var databasedBeatmap))
+            {
+                using (var conn = Database.GetConnection())
+                {
+                    cached_beatmaps[score.beatmap_id] = databasedBeatmap = conn.QuerySingle<DatabasedBeatmap>(
+                        "SELECT * FROM `osu_beatmaps` WHERE `beatmap_id` = @BeatmapId",
+                        new
+                        {
+                            BeatmapId = score.beatmap_id,
+                        });
+                }
+            }
+
             if (!cached_beatmap_attribs.TryGetValue(score.beatmap_id, out var databasedAttribs))
             {
                 using (var conn = Database.GetConnection())
@@ -53,7 +69,7 @@ namespace osu.Server.PerformanceCalculator
                 return;
 
             DifficultyAttributes difficultyAttribs = databasedAttribs.Where(a => a.mode == rulesetId && a.mods == (int)((LegacyMods)score.enabled_mods).MaskRelevantMods())
-                                                                     .ToDictionary(a => (int)a.attrib_id).Map(rulesetId);
+                                                                     .ToDictionary(a => (int)a.attrib_id).Map(rulesetId, databasedBeatmap);
             difficultyAttribs.Mods = ruleset.ConvertFromLegacyMods((LegacyMods)score.enabled_mods).ToArray();
 
             var rating = ruleset.CreatePerformanceCalculator(difficultyAttribs, score.ToScore(ruleset))
