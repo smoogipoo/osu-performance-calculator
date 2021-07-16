@@ -5,8 +5,6 @@ jobs:
   test:
     name: Test
     runs-on: ${{matrix.os.fullname}}
-    env:
-      OSU_EXECUTION_MODE: ${{matrix.threadingMode}}
     strategy:
        fail-fast: false
        matrix:
@@ -14,7 +12,6 @@ jobs:
             - { prettyname: Windows, fullname: windows-latest }
             - { prettyname: macOS, fullname: macos-latest }
             - { prettyname: Linux, fullname: ubuntu-latest }
-          threadingMode: ['SingleThread', 'MultiThreaded']
     timeout-minutes: 60
     steps:
       - name: Checkout
