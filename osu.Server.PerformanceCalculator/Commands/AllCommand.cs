@@ -12,7 +12,7 @@ namespace osu.Server.PerformanceCalculator.Commands
         [Option(CommandOptionType.SingleValue, Template = "-C|--continue", Description = "Continue where a previously aborted 'all' run was left off.")]
         public bool Continue { get; set; }
 
-        protected override IEnumerable<int> GetScores()
+        protected override IEnumerable<long> GetScores()
         {
             throw new System.NotImplementedException();
         }

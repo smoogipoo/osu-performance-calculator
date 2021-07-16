@@ -9,7 +9,7 @@ namespace osu.Server.PerformanceCalculator.Commands
     [Command(Name = "new", Description = "Continually polls for new scores to compute the performance for.")]
     public class NewCommand : CalculatorCommand
     {
-        protected override IEnumerable<int> GetScores()
+        protected override IEnumerable<long> GetScores()
         {
             throw new System.NotImplementedException();
         }

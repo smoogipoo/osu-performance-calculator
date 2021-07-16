@@ -23,7 +23,7 @@ namespace osu.Server.PerformanceCalculator
             this.ruleset = available_rulesets.Single(r => r.RulesetInfo.ID == ruleset);
         }
 
-        public void ProcessScore(int score)
+        public void ProcessScore(long score)
         {
         }
 

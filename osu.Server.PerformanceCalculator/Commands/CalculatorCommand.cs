@@ -52,6 +52,6 @@ namespace osu.Server.PerformanceCalculator.Commands
             }
         }
 
-        protected abstract IEnumerable<int> GetScores();
+        protected abstract IEnumerable<long> GetScores();
     }
 }
