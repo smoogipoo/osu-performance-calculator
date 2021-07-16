@@ -10,7 +10,7 @@ namespace osu.Server.PerformanceCalculator.Commands
     public class SqlCommand : CalculatorCommand
     {
         [Argument(0, "statement", "The SQL statement selecting the user IDs to compute performance for.")]
-        public string Statement { get; set; }
+        public string Statement { get; set; } = null!;
 
         protected override IEnumerable<int> GetScores()
         {

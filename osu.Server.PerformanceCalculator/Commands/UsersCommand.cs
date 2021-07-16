@@ -10,7 +10,7 @@ namespace osu.Server.PerformanceCalculator.Commands
     public class UsersCommand : CalculatorCommand
     {
         [Argument(0, "users", "The user IDs to recompute performance for.")]
-        public int[] Users { get; set; }
+        public int[] Users { get; set; } = null!;
 
         protected override IEnumerable<int> GetScores()
         {

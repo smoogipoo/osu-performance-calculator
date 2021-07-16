@@ -10,11 +10,8 @@ namespace osu.Server.PerformanceCalculator.Commands
     public class ScoresCommand : CalculatorCommand
     {
         [Argument(0, "scores", "The score IDs to recompute performance for.")]
-        public int[] Scores { get; set; }
+        public int[] Scores { get; set; } = null!;
 
-        protected override IEnumerable<int> GetScores()
-        {
-            throw new System.NotImplementedException();
-        }
+        protected override IEnumerable<int> GetScores() => Scores;
     }
 }

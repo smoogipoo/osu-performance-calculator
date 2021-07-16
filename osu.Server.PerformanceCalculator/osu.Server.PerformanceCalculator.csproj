@@ -4,11 +4,12 @@
         <TargetFramework>net5.0</TargetFramework>
         <AssemblyName>osu.Server.PerformanceCalculator</AssemblyName>
         <RootNamespace>osu.Server.PerformanceCalculator</RootNamespace>
-        <LangVersion>7.1</LangVersion>
+        <LangVersion>8</LangVersion>
         <ServerGarbageCollection>true</ServerGarbageCollection>
         <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
         <Company>ppy Pty Ltd</Company>
         <copyright>Copyright (c) 2019 ppy Pty Ltd</copyright>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Dapper" Version="2.0.90" />
