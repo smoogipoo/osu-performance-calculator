@@ -44,7 +44,7 @@ namespace osu.Server.PerformanceCalculator.Commands
             {
                 if (currentScoreEnumerator == null || !currentScoreEnumerator.MoveNext())
                 {
-                    currentScoreEnumerator = connection.Query<DatabasedScore>($"SELECT * FROM `{TableUtils.ScoresTable(ruleset)}` WHERE `score_id` > @ScoreId ORDER BY `score_id` ASC LIMIT @BatchSize",
+                    currentScoreEnumerator = connection.Query<DatabasedScore>($"SELECT * FROM {TableUtils.ScoresTable(ruleset)} WHERE `score_id` > @ScoreId ORDER BY `score_id` ASC LIMIT @BatchSize",
                         new
                         {
                             ScoreId = currentScoreId,

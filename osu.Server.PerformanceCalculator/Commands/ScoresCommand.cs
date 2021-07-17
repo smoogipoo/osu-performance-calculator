@@ -18,7 +18,7 @@ namespace osu.Server.PerformanceCalculator.Commands
         {
             using (var conn = Database.GetConnection())
             {
-                return conn.Query<DatabasedScore>($"SELECT * FROM `{TableUtils.ScoresTable(Ruleset)}` WHERE `score_id` IN @ScoreIds", new
+                return conn.Query<DatabasedScore>($"SELECT * FROM {TableUtils.ScoresTable(Ruleset)} WHERE `score_id` IN @ScoreIds", new
                 {
                     ScoreIds = Scores
                 });

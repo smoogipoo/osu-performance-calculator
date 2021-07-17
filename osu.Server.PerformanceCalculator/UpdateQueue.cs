@@ -41,7 +41,7 @@ namespace osu.Server.PerformanceCalculator
             while (queue.Count > 0)
             {
                 var item = queue.Dequeue();
-                queryBuilder.Append($"UPDATE `{TableUtils.ScoresTable(rulesetId)}` SET `pp` = {item.Item2} WHERE `score_id` = {item.Item1.score_id};");
+                queryBuilder.Append($"UPDATE {TableUtils.ScoresTable(rulesetId)} SET `pp` = {item.Item2} WHERE `score_id` = {item.Item1.score_id};");
             }
 
             queryBuilder.Append("COMMIT;");
