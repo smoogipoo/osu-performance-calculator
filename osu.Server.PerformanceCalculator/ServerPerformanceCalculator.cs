@@ -36,36 +36,17 @@ namespace osu.Server.PerformanceCalculator
             rulesetId = ruleset;
         }
 
-        public void ProcessScore(DatabasedScore score)
+        /// <summary>
+        /// Updates the performance value of a score.
+        /// </summary>
+        /// <param name="score">The score to update.</param>
+        public void UpdateScore(DatabasedScore score)
         {
-            if (!cached_beatmaps.TryGetValue(score.beatmap_id, out var databasedBeatmap))
-            {
-                using (var conn = Database.GetConnection())
-                {
-                    cached_beatmaps[score.beatmap_id] = databasedBeatmap = conn.QuerySingleOrDefault<DatabasedBeatmap>(
-                        "SELECT * FROM `osu_beatmaps` WHERE `beatmap_id` = @BeatmapId",
-                        new
-                        {
-                            BeatmapId = score.beatmap_id,
-                        });
-                }
-            }
-
-            if (!cached_beatmap_attribs.TryGetValue(score.beatmap_id, out var databasedAttribs))
-            {
-                using (var conn = Database.GetConnection())
-                {
-                    cached_beatmap_attribs[score.beatmap_id] = databasedAttribs = conn.Query<DatabasedBeatmapDifficultyAttrib>(
-                        "SELECT * FROM `osu_beatmap_difficulty_attribs` WHERE `beatmap_id` = @BeatmapId",
-                        new
-                        {
-                            BeatmapId = score.beatmap_id,
-                        }).ToArray();
-                }
-            }
+            var databasedBeatmap = queryBeatmap(score.beatmap_id);
+            var databasedAttribs = queryAttribs(score.beatmap_id);
 
             // Todo: Log.
-            if (databasedBeatmap == null || databasedAttribs.Length == 0)
+            if (databasedBeatmap == null || databasedAttribs == null || databasedAttribs.Length == 0)
                 return;
 
             DifficultyAttributes difficultyAttribs = databasedAttribs.Where(a => a.mode == rulesetId && a.mods == (int)((LegacyMods)score.enabled_mods).MaskRelevantMods())
@@ -76,6 +57,42 @@ namespace osu.Server.PerformanceCalculator
                                 .Calculate(new Dictionary<string, double>());
 
             updateQueue.Add(score, rating);
+        }
+
+        private DatabasedBeatmap? queryBeatmap(uint beatmapId)
+        {
+            if (!cached_beatmaps.TryGetValue(beatmapId, out var databasedBeatmap))
+            {
+                using (var conn = Database.GetConnection())
+                {
+                    cached_beatmaps[beatmapId] = databasedBeatmap = conn.QuerySingleOrDefault<DatabasedBeatmap>(
+                        "SELECT * FROM `osu_beatmaps` WHERE `beatmap_id` = @BeatmapId",
+                        new
+                        {
+                            BeatmapId = beatmapId,
+                        });
+                }
+            }
+
+            return databasedBeatmap;
+        }
+
+        private DatabasedBeatmapDifficultyAttrib[]? queryAttribs(uint beatmapId)
+        {
+            if (!cached_beatmap_attribs.TryGetValue(beatmapId, out var databasedAttribs))
+            {
+                using (var conn = Database.GetConnection())
+                {
+                    cached_beatmap_attribs[beatmapId] = databasedAttribs = conn.Query<DatabasedBeatmapDifficultyAttrib>(
+                        "SELECT * FROM `osu_beatmap_difficulty_attribs` WHERE `beatmap_id` = @BeatmapId",
+                        new
+                        {
+                            BeatmapId = beatmapId,
+                        }).ToArray();
+                }
+            }
+
+            return databasedAttribs;
         }
 
         private static List<Ruleset> getRulesets()

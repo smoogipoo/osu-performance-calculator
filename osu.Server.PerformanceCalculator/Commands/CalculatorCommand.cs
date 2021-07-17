@@ -73,7 +73,7 @@ namespace osu.Server.PerformanceCalculator.Commands
 
                             try
                             {
-                                calc.ProcessScore(score);
+                                calc.UpdateScore(score);
                             }
                             catch (Exception e)
                             {
