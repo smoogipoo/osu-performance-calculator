@@ -73,7 +73,7 @@ namespace osu.Server.PerformanceCalculator
             return databasedBeatmap;
         }
 
-        private DatabasedBeatmapDifficultyAttrib[]? queryAttribs(uint beatmapId)
+        private DatabasedBeatmapDifficultyAttrib[] queryAttribs(uint beatmapId)
         {
             if (!cached_beatmap_attribs.TryGetValue(beatmapId, out var databasedAttribs))
             {
