@@ -62,26 +62,24 @@ namespace osu.Server.PerformanceCalculator.Commands
             {
                 tasks[i] = Task.Factory.StartNew(() =>
                 {
-                    using (var updateQueue = new UpdateQueue(Ruleset))
+                    using var updateQueue = new UpdateQueue(Ruleset);
+                    var calc = new ServerPerformanceCalculator(Ruleset);
+
+                    while (!allAdded || !scoreQueue.IsEmpty)
                     {
-                        var calc = new ServerPerformanceCalculator(Ruleset, DryRun, updateQueue);
+                        if (!scoreQueue.TryDequeue(out var score))
+                            continue;
 
-                        while (!allAdded || !scoreQueue.IsEmpty)
+                        try
                         {
-                            if (!scoreQueue.TryDequeue(out var score))
-                                continue;
-
-                            try
-                            {
-                                calc.UpdateScore(score);
-                            }
-                            catch (Exception e)
-                            {
-                                reporter.Error($"{score.score_id} failed with {e}");
-                            }
-
-                            Interlocked.Increment(ref processedScores);
+                            calc.UpdateScore(score, DryRun ? null : updateQueue);
                         }
+                        catch (Exception e)
+                        {
+                            reporter.Error($"{score.score_id} failed with {e}");
+                        }
+
+                        Interlocked.Increment(ref processedScores);
                     }
                 }, TaskCreationOptions.LongRunning);
             }

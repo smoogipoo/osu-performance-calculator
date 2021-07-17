@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -25,13 +24,9 @@ namespace osu.Server.PerformanceCalculator
 
         private readonly Ruleset ruleset;
         private readonly int rulesetId;
-        private readonly bool dryRun;
-        private readonly UpdateQueue updateQueue;
 
-        public ServerPerformanceCalculator(int ruleset, bool dryRun, UpdateQueue updateQueue)
+        public ServerPerformanceCalculator(int ruleset)
         {
-            this.dryRun = dryRun;
-            this.updateQueue = updateQueue;
             this.ruleset = available_rulesets.Single(r => r.RulesetInfo.ID == ruleset);
             rulesetId = ruleset;
         }
@@ -40,7 +35,8 @@ namespace osu.Server.PerformanceCalculator
         /// Updates the performance value of a score.
         /// </summary>
         /// <param name="score">The score to update.</param>
-        public void UpdateScore(DatabasedScore score)
+        /// <param name="updateQueue">The queue to use for performing updates to the database. No updates will happen if <c>null</c>.</param>
+        public void UpdateScore(DatabasedScore score, UpdateQueue? updateQueue = null)
         {
             var databasedBeatmap = queryBeatmap(score.beatmap_id);
             var databasedAttribs = queryAttribs(score.beatmap_id);
@@ -56,7 +52,7 @@ namespace osu.Server.PerformanceCalculator
             var rating = ruleset.CreatePerformanceCalculator(difficultyAttribs, score.ToScore(ruleset))
                                 .Calculate(new Dictionary<string, double>());
 
-            updateQueue.Add(score, rating);
+            updateQueue?.Add(score, rating);
         }
 
         private DatabasedBeatmap? queryBeatmap(uint beatmapId)
