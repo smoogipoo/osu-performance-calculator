@@ -42,7 +42,7 @@ namespace osu.Server.PerformanceCalculator
             var databasedAttribs = queryAttribs(score.beatmap_id);
 
             // Todo: Log.
-            if (databasedBeatmap == null || databasedAttribs == null || databasedAttribs.Length == 0)
+            if (databasedBeatmap == null || databasedAttribs.Length == 0)
                 return;
 
             DifficultyAttributes difficultyAttribs = databasedAttribs.Where(a => a.mode == rulesetId && a.mods == (int)((LegacyMods)score.enabled_mods).MaskRelevantMods())
